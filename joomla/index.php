@@ -188,7 +188,7 @@ if($step == 2) {
             $real_path = 'http://'.$_SERVER['HTTP_HOST'].preg_replace('/\/index.php$/i','', $_SERVER['SCRIPT_NAME']);
             for($i=0;$i<$article_division;$i++) {
                 $start = $i*$article_division_cnt;
-                $filename = sprintf("phpBB.articles.%06d.xml", $i+1);
+                $filename = sprintf("joomla.articles.%06d.xml", $i+1);
                 $url = sprintf("%s/export.php?filename=%s&amp;path=%s&amp;start=%d&amp;limit_count=%d&amp;exclude_attach=%s&amp;target_module=module", $real_path, urlencode($filename), urlencode($path), $start, $article_division_cnt, $exclude_attach);
         ?>
             <li>
@@ -208,7 +208,7 @@ if($step == 2) {
             $real_path = 'http://'.$_SERVER['HTTP_HOST'].preg_replace('/\/index.php$/i','', $_SERVER['SCRIPT_NAME']);
             for($i=0;$i<$member_division;$i++) {
                 $start = $i*$member_division_cnt;
-                $filename = sprintf("phpBB.members.%06d.xml", $i+1);
+                $filename = sprintf("joomla.members.%06d.xml", $i+1);
                 $url = sprintf("%s/export.php?filename=%s&amp;path=%s&amp;start=%d&amp;limit_count=%d&amp;exclude_attach=%s&amp;target_module=member", $real_path, urlencode($filename), urlencode($path), $start, $member_division_cnt, $exclude_attach);
         ?>
             <li>
@@ -228,7 +228,7 @@ if($step == 2) {
             $real_path = 'http://'.$_SERVER['HTTP_HOST'].preg_replace('/\/index.php$/i','', $_SERVER['SCRIPT_NAME']);
             for($i=0;$i<$message_division;$i++) {
                 $start = $i*$message_division_cnt;
-                $filename = sprintf("phpBB.messages.%06d.xml", $i+1);
+                $filename = sprintf("joomla.messages.%06d.xml", $i+1);
                 $url = sprintf("%s/export.php?filename=%s&amp;path=%s&amp;start=%d&amp;limit_count=%d&amp;exclude_attach=%s&amp;target_module=message", $real_path, urlencode($filename), urlencode($path), $start, $message_division_cnt, $exclude_attach);
         ?>
             <li>

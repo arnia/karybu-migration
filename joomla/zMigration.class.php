@@ -242,9 +242,9 @@
 
             // extra_vars를 제외한 변수 출력
             foreach($obj as $key => $val) {
-                if($key == 'extra_vars' || !$val) continue;
+                if ($key == 'extra_vars' || !$val) continue;
 
-                if($key == 'image_nickname' || $key == 'image_mark' || $key == 'profile_image') {
+                if ($key == 'image_nickname' || $key == 'image_mark' || $key == 'profile_image') {
                     if(file_exists($val)) {
                         printf("<%s>", $key);
                         $this->printBinary($val);
@@ -252,7 +252,6 @@
                     }
                     continue;
                 }
-
                 printf("<%s>", $key); $this->printString($val); printf("</%s>\r\n", $key);
             }
 

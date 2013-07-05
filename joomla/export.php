@@ -1,6 +1,7 @@
 <?php
 // florin, 7/4/13, 3:57 PM
 
+error_reporting(0);
 @set_time_limit(0);
 // zMigration class require
 require_once('./lib.inc.php');
@@ -57,3 +58,43 @@ $limit_query = $oMigration->getLimitQuery($start, $limit_count);
 $oMigration->setItemCount($limit_count);
 $oMigration->printHeader();
 
+if($target_module == 'member') {
+
+    // Retrieve all members from the database
+    // filter by user_type: Defines what type the user is. 0 is normal user, 1 is inactive and needs to activate their account through an activation link sent in an email, 2 is a pre-defined type to ignore user (i.e. bot), 3 is Founder.
+    $query = sprintf("select * from %s_users order by id asc %s ",$db_info->db_table_prefix, $limit_query);
+    $member_result = $oMigration->query($query);
+
+    // Transform phpbb members into objects that represent XE member
+    // Password is not imported because XE and phpBB use different hashing algorithms.
+    while($member_info = $oMigration->fetch($member_result)) {
+        $obj = new stdClass;
+        $obj->user_id = $member_info->username;
+        $obj->user_name = $member_info->name;
+        $obj->nick_name = $member_info->username;
+        $obj->email = $member_info->email;
+        //$obj->homepage = $member_info->user_website;
+        //$obj->blog = $member_info->user_website;
+        //$obj->birthday = date("YmdHis", strtotime($member_info->user_birthday));
+        //$obj->allow_mailing = $member_info->user_notify!=0?'Y':'N';
+        //$obj->allow_message = $member_info->user_notify_pm!=0?'Y':'N';
+        $obj->regdate = date("YmdHis", strtotime($member_info->registerDate));
+        //$obj->signature = $member_info->user_sig;
+
+        // TODO Also import avatar pictures into profile images / image marks
+        //$obj->image_nickname = sprintf("%s%d.gif", $image_nickname_path, $member_info->no);
+        //if($member_info->icon) $obj->image_mark = sprintf("%s/%s", $path, $member_info->icon);
+        //$obj->profile_image = '';
+
+        $obj->extra_vars = array(
+            'icq' => $member_info->user_icq,
+            'yim' => $member_info->user_yim,
+            'msn' => $member_info->user_msnm,
+            'job' => $member_info->user_occ,
+            'hobby' => $member_info->user_interests,
+            'address' => $member_info->user_from
+        );
+
+        $oMigration->printMemberItem($obj);
+    }
+}
