@@ -73,6 +73,7 @@ if($target_module == 'member') {
         $obj->user_name = $member_info->name;
         $obj->nick_name = $member_info->username;
         $obj->email = $member_info->email;
+        $obj->password = $member_info->password;
         //$obj->homepage = $member_info->user_website;
         //$obj->blog = $member_info->user_website;
         //$obj->birthday = date("YmdHis", strtotime($member_info->user_birthday));
