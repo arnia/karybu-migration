@@ -310,7 +310,9 @@
             // 내용을 출력
             foreach($obj as $key => $val) {
                 if(!$val) continue;
-                printf("<%s>", $key); $this->printString($val); printf("</%s>\r\n", $key);
+                echo "<$key>";
+                $this->printString($val);
+                echo "</$key>\n";
             }
 
             // 엮인글 출력

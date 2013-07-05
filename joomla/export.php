@@ -131,6 +131,7 @@ endOfQuery;
     $documentsResult = $oMigration->query($query);
     while ($doc = $oMigration->fetch($documentsResult)) {
 //        $obj = new stdClass;
+        //TODO maybe get user info? get comments?
         $oMigration->printPostItem($doc->document_srl, $doc);
     }
 }
