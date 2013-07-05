@@ -91,9 +91,7 @@ if($target_module == 'member') {
         $obj->password = $member_info->password;
         $obj->birthday = $member_info->birthday;
         $obj->homepage = $member_info->homepage;
-        //$obj->homepage = $member_info->user_website;
         //$obj->blog = $member_info->user_website;
-        //$obj->birthday = date("YmdHis", strtotime($member_info->user_birthday));
         //$obj->allow_mailing = $member_info->user_notify!=0?'Y':'N';
         //$obj->allow_message = $member_info->user_notify_pm!=0?'Y':'N';
         $obj->regdate = date("YmdHis", strtotime($member_info->registerDate));
@@ -104,15 +102,37 @@ if($target_module == 'member') {
         //if($member_info->icon) $obj->image_mark = sprintf("%s/%s", $path, $member_info->icon);
         //$obj->profile_image = '';
 
-        $obj->extra_vars = array(
-            'icq' => $member_info->user_icq,
-            'yim' => $member_info->user_yim,
-            'msn' => $member_info->user_msnm,
-            'job' => $member_info->user_occ,
-            'hobby' => $member_info->user_interests,
-            'address' => $member_info->user_from
-        );
-
         $oMigration->printMemberItem($obj);
     }
+
 }
+
+else {
+
+    $contentTable = $db_info->db_table_prefix . '_content';
+    $usersTable = $db_info->db_table_prefix . '_users';
+    $query = <<<endOfQuery
+SELECT
+    c.id AS document_srl,
+    c.title AS title,
+    COALESCE( NULLIF(  `fulltext` ,  '' ) , introtext ) AS content,
+    c.alias AS alias,
+    DATE_FORMAT(  `created` , '%Y%m%d%H%i%S' ) AS regdate,
+    DATE_FORMAT(  `modified` ,  '%Y%m%d%H%i%S' ) AS last_update,
+    c.created_by AS user_id,
+    u.username AS user_name,
+    u.name AS nick_name,
+    u.email AS email_address
+FROM $contentTable c
+LEFT JOIN $usersTable u ON c.created_by = u.id
+ORDER BY c.id ASC
+$limit_query
+endOfQuery;
+    $documentsResult = $oMigration->query($query);
+    while ($doc = $oMigration->fetch($documentsResult)) {
+//        $obj = new stdClass;
+        $oMigration->printPostItem($doc->document_srl, $doc);
+    }
+}
+
+$oMigration->printFooter();

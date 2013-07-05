@@ -136,9 +136,11 @@
         }
 
         function fetch($result) {
-            if (!is_object($result)) {
-                //throw new Exception('Invalid query result');
+
+            if (!$result) {
+                return false;
             }
+
             switch($this->db_info->db_type) {
                 case 'mysql' :
                 case 'mysql_innodb' :
