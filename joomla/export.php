@@ -68,6 +68,7 @@ if($target_module == 'member') {
     // Transform phpbb members into objects that represent XE member
     // Password is not imported because XE and phpBB use different hashing algorithms.
     while($member_info = $oMigration->fetch($member_result)) {
+
         $obj = new stdClass;
         $obj->user_id = $member_info->username;
         $obj->user_name = $member_info->name;
@@ -81,6 +82,15 @@ if($target_module == 'member') {
         //$obj->allow_message = $member_info->user_notify_pm!=0?'Y':'N';
         $obj->regdate = date("YmdHis", strtotime($member_info->registerDate));
         //$obj->signature = $member_info->user_sig;
+        $q = sprintf("select * from %s_user_profiles where user_id = %d",$db_info->db_table_prefix, $member_info->id);
+        $profileResult = $oMigration->query($q);
+        while ($profileInfo = $oMigration->fetch($profileResult)){
+            if ($profileInfo->profile_key == 'profile.dob'){
+                $value = trim($profileInfo->profile_value, '"');
+                $obj->birthday = str_replace('-', '', $value);
+            }
+
+        }
 
         // TODO Also import avatar pictures into profile images / image marks
         //$obj->image_nickname = sprintf("%s%d.gif", $image_nickname_path, $member_info->no);
