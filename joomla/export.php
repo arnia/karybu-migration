@@ -62,7 +62,21 @@ if($target_module == 'member') {
 
     // Retrieve all members from the database
     // filter by user_type: Defines what type the user is. 0 is normal user, 1 is inactive and needs to activate their account through an activation link sent in an email, 2 is a pre-defined type to ignore user (i.e. bot), 3 is Founder.
-    $query = sprintf("select * from %s_users order by id asc %s ",$db_info->db_table_prefix, $limit_query);
+    $prefix = $db_info->db_table_prefix;
+    $q = "SELECT
+                u.*,
+                REPLACE(upb.profile_value, '\"', '') as birthday,
+                REPLACE(upw.profile_value, '\"', '') as homepage
+              FROM
+                %s_users u
+              LEFT JOIN
+                %s_user_profiles upb ON u.id = upb.user_id AND upb.profile_key = 'profile.dob'
+              LEFT JOIN
+                %s_user_profiles upw ON u.id = upw.user_id AND upw.profile_key = 'profile.website'
+              ORDER BY u.id asc
+              %s
+            ";
+    $query = sprintf($q, $prefix, $prefix, $prefix, $limit_query);
     $member_result = $oMigration->query($query);
 
     // Transform phpbb members into objects that represent XE member
@@ -75,6 +89,8 @@ if($target_module == 'member') {
         $obj->nick_name = $member_info->username;
         $obj->email = $member_info->email;
         $obj->password = $member_info->password;
+        $obj->birthday = $member_info->birthday;
+        $obj->homepage = $member_info->homepage;
         //$obj->homepage = $member_info->user_website;
         //$obj->blog = $member_info->user_website;
         //$obj->birthday = date("YmdHis", strtotime($member_info->user_birthday));
@@ -82,15 +98,6 @@ if($target_module == 'member') {
         //$obj->allow_message = $member_info->user_notify_pm!=0?'Y':'N';
         $obj->regdate = date("YmdHis", strtotime($member_info->registerDate));
         //$obj->signature = $member_info->user_sig;
-        $q = sprintf("select * from %s_user_profiles where user_id = %d",$db_info->db_table_prefix, $member_info->id);
-        $profileResult = $oMigration->query($q);
-        while ($profileInfo = $oMigration->fetch($profileResult)){
-            if ($profileInfo->profile_key == 'profile.dob'){
-                $value = trim($profileInfo->profile_value, '"');
-                $obj->birthday = str_replace('-', '', $value);
-            }
-
-        }
 
         // TODO Also import avatar pictures into profile images / image marks
         //$obj->image_nickname = sprintf("%s%d.gif", $image_nickname_path, $member_info->no);
