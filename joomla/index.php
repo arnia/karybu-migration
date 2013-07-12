@@ -162,12 +162,6 @@ if($step == 2) {
                 Member partition size : <input type="text" name="member_division" value="<?php echo $member_division?>" />
             </li>
         </ul>
-        <ul>
-            <li>Total message count : <?php print $total_message_count; ?></li>
-            <li>
-                Article partition size : <input type="text" name="message_division" value="<?php echo $message_division?>" />
-            </li>
-        </ul>
             <blockquote>
                 <input type="submit" value="Update partition size" class="input_submit" />
             </blockquote>
@@ -222,25 +216,7 @@ if($step == 2) {
         ?>
         </ol>
 
-        <h3>Messages</h3>
-        <ol>
-        <?php
-            $real_path = 'http://'.$_SERVER['HTTP_HOST'].preg_replace('/\/index.php$/i','', $_SERVER['SCRIPT_NAME']);
-            for($i=0;$i<$message_division;$i++) {
-                $start = $i*$message_division_cnt;
-                $filename = sprintf("joomla.messages.%06d.xml", $i+1);
-                $url = sprintf("%s/export.php?filename=%s&amp;path=%s&amp;start=%d&amp;limit_count=%d&amp;exclude_attach=%s&amp;target_module=message", $real_path, urlencode($filename), urlencode($path), $start, $message_division_cnt, $exclude_attach);
-        ?>
-            <li>
-                <a href="<?php print $url?>">
-                    <?php print $filename?>
-                </a>
-                ( <?php print $start+1?> ~ <?php print $start+$message_division_cnt?> )
-            </li>
-        <?php
-            }
-        ?>
-        </ol>
+
     </form>
     <?php
         }
