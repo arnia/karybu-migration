@@ -109,7 +109,129 @@ if($target_module == 'member') {
 
 else {
 
-    $contentTable = $db_info->db_table_prefix . '_content';
+    /**************************
+     * Categories (document_categories)
+     **************************/
+
+    // Retrieve joomla categories
+    $query = sprintf("select category.id as category_srl
+							, category.parent_id as parent_srl
+							, category.title as title
+							, category.description as description
+						  from %s_categories as category", $db_info->db_table_prefix);
+
+    $category_result = $oMigration->query($query);
+    while($category_info= $oMigration->fetch($category_result)) {
+        $obj = new stdClass;
+        $obj->title = strip_tags($category_info->title);
+        $obj->sequence = $category_info->category_srl;
+        $obj->parent = $category_info->parent_srl;
+        $category_list[$category_info->category_srl] = $obj;
+        $category_titles[$obj->title] = $category_info->category_srl;
+    }
+
+    // Write categories to XML file
+    $oMigration->printCategoryItem($category_list);
+
+    /**************************
+     * Documents
+     **************************/
+    // Retrieve joomla articles
+    $query = "
+			select article.id as document_srl
+				 , article.title as title
+				 , COALESCE( NULLIF(  `fulltext` ,  '' ) , introtext ) AS content
+				 , user.id as user_id
+				 , user.username as user_name
+				 , user.username as nick_name
+				 , user.email as email_address
+				 , date_format(from_unixtime(created),'%Y%m%d%H%i%S') as regdate
+				 , date_format(from_unixtime(modified),'%Y%m%d%H%i%S') as last_update
+			from {$db_info->db_table_prefix}_content as article
+				inner join {$db_info->db_table_prefix}_users as user on user.id = article.created_by
+			order by article.id desc
+			{$limit_query}";
+    $document_result = $oMigration->query($query);
+
+    while($document_info = $oMigration->fetch($document_result)) {
+        $obj = new stdClass;
+
+        // Setup document common attributes
+        $obj->title = $document_info->title;
+        $obj->content = $document_info->content;
+        $obj->user_id = $document_info->user_id;
+        $obj->user_name = $document_info->user_name;
+        $obj->nick_name = $document_info->nick_name;
+        $obj->email = $document_info->email_address;
+        $obj->regdate =  $document_info->regdate;
+        $obj->update = $document_info->last_update;
+
+        // Retrieve document categories
+        $query = sprintf("select category.id as category_srl
+									, category.title as title
+								from %s_content article
+								  inner join %s_categories category on category.id = article.catid
+								where article.id = %d"
+            ,$db_info->db_table_prefix,$db_info->db_table_prefix, $document_info->document_srl);
+
+        $cat_result = $oMigration->query($query);
+        $tags = array();
+        while($cat_info = $oMigration->fetch($cat_result)) {
+            $tags[] = $cat_info->title;
+            if(!isset($obj->category)) $obj->category = $cat_info->title;
+        }
+
+        // Retrieve document comments
+        $comments = array();
+        $query = "
+				select comment.id as comment_srl
+				   , comment.parent as parent_srl
+				   , comment.title as title
+				   , comment.comment as content
+				   , comment.isgood as voted_count
+				   , comment.ispoor as blamed_count
+				   , comment.subscribe as notify_message
+				   , 0 as user_id
+				   , comment.name as user_name
+				   , comment.name as nick_name
+				   , comment.email as email_address
+				   , comment.homepage as homepage
+				   , date_format(from_unixtime(date),'%Y%m%d%H%i%S') as regdate
+				   , date_format(from_unixtime(date),'%Y%m%d%H%i%S') as last_update
+				   , comment.ip as ipaddress
+				from {$db_info->db_table_prefix}_content as article
+				  inner join {$db_info->db_table_prefix}_jcomments as comment
+					 on comment.object_id = article.id
+				where article.id = {$document_info->document_srl}
+				order by comment.id asc
+			";
+
+        $comment_result = $oMigration->query($query);
+        while($comment_info = $oMigration->fetch($comment_result)) {
+            $comment_obj = new stdClass;
+
+            $comment_obj->sequence = $comment_info->comment_srl;
+            $comment_obj->parent = $comment_info->parent_srl;
+            $comment_obj->content = $comment_info->content;
+            $comment_obj->voted_count = $comment_info->voted_count;
+            $comment_obj->notify_message = $comment_info->notify_message;
+            $comment_obj->user_id = $comment_info->user_id;
+            $comment_obj->nick_name = $comment_info->nick_name;
+            $comment_obj->user_name = $comment_info->user_name;
+            $comment_obj->email = $comment_info->email_address;
+            $comment_obj->homepage = $comment_info->homepage;
+            $comment_obj->regdate = $comment_info->regdate;
+            $comment_obj->update = $comment_info->last_update;
+            $comment_obj->ipaddress = $comment_info->ipaddress;
+            $comments[] = $comment_obj;
+        }
+
+        $obj->comments = $comments;
+
+        $oMigration->printPostItem($document_info->document_srl, $obj, $exclude_attach);
+    }
+
+    /*$contentTable = $db_info->db_table_prefix . '_content';
     $usersTable = $db_info->db_table_prefix . '_users';
     $query = <<<endOfQuery
 SELECT
@@ -133,7 +255,7 @@ endOfQuery;
 //        $obj = new stdClass;
         //TODO maybe get user info? get comments?
         $oMigration->printPostItem($doc->document_srl, $doc);
-    }
+    }*/
 }
 
 $oMigration->printFooter();
