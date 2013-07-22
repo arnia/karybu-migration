@@ -108,31 +108,55 @@ if($target_module == 'member') {
 }
 
 else {
-
+    $q = sprintf("DESCRIBE %s_jtags_tags", $db_info->db_table_prefix);
+    $result = $oMigration->query($q);
+    if ($result){
+        $hasTags = true;
+    }
+    else{
+        $hasTags = false;
+    }
     /**************************
      * Categories (document_categories)
      **************************/
+    //show categories only on first batch
 
-    // Retrieve joomla categories
-    $query = sprintf("select category.id as category_srl
-							, category.parent_id as parent_srl
-							, category.title as title
-							, category.description as description
-						  from %s_categories as category", $db_info->db_table_prefix);
+    if ($start == 0) {
+        // Retrieve joomla categories
+        $query = sprintf("select category.id as category_srl
+                                , category.parent_id as parent_srl
+                                , category.title as title
+                                , category.description as description
+                              from %s_categories as category", $db_info->db_table_prefix);
 
-    $category_result = $oMigration->query($query);
-    while($category_info= $oMigration->fetch($category_result)) {
-        $obj = new stdClass;
-        $obj->title = strip_tags($category_info->title);
-        $obj->sequence = $category_info->category_srl;
-        $obj->parent = $category_info->parent_srl;
-        $category_list[$category_info->category_srl] = $obj;
-        $category_titles[$obj->title] = $category_info->category_srl;
+        $category_result = $oMigration->query($query);
+        while($category_info= $oMigration->fetch($category_result)) {
+            $obj = new stdClass;
+            $obj->title = strip_tags($category_info->title);
+            $obj->sequence = $category_info->category_srl;
+            $obj->parent = $category_info->parent_srl;
+            $category_list[$category_info->category_srl] = $obj;
+            $category_titles[$obj->title] = $category_info->category_srl;
+        }
+
+        // Write categories to XML file
+        $oMigration->printCategoryItem($category_list);
+
+        //tags
+        //check if tags exist
+//        if ($hasTags){
+//            $query = sprintf("select * from %s_jtags_tags", $db_info->db_table_prefix);
+//            $tags_result = $oMigration->query($query);
+//            $tags = array();
+//            while($tag_info = $oMigration->fetch($tags_result)) {
+//                $obj = new stdClass;
+//                $obj->tag_id = $tag_info->tag_id;
+//                $obj->tag = $tag_info->name;
+//                $tags[$obj->tag_id] = $obj;
+//            }
+//            $oMigration->printTagItem($tags);
+//        }
     }
-
-    // Write categories to XML file
-    $oMigration->printCategoryItem($category_list);
-
     /**************************
      * Documents
      **************************/
@@ -159,6 +183,7 @@ else {
         $obj = new stdClass;
 
         // Setup document common attributes
+        //$obj->id = $document_info->document_srl;
         $obj->title = $document_info->title;
         $obj->content = $document_info->content;
         $obj->user_id = $document_info->user_id;
@@ -184,7 +209,27 @@ else {
             $tags[] = $cat_info->title;
             if(!isset($obj->category)) $obj->category = $cat_info->title;
         }
-
+        //retrieve document tags
+        if ($hasTags){
+            $itemTags = array();
+            $query = sprintf("select tags.tag_id as tag_srl
+									, tags.name as tag
+								from %s_jtags_items item_tag
+								  inner join %s_jtags_tags tags on item_tag.tag_id = tags.tag_id
+								where item_tag.item_id = %d AND item_tag.component = 'com_content'"
+                ,$db_info->db_table_prefix,$db_info->db_table_prefix, $document_info->document_srl);
+            $tags_result = $oMigration->query($query);
+            while($tag_info = $oMigration->fetch($tags_result)) {
+                $itemTags[] = $tag_info->tag;
+                if(!isset($obj->tags)) {
+                    $obj->tags = array();
+                }
+                $obj->tags[] = $tag_info->tag;
+            }
+            //set tags on one line
+            //$obj->tag_count = count($obj->tags);
+            $obj->tags = implode(',', $obj->tags);
+        }
         // Retrieve document comments
         $comments = array();
         $query = "
@@ -231,8 +276,9 @@ else {
         }
 
         $obj->comments = $comments;
-
-        $oMigration->printPostItem($document_info->document_srl, $obj, $exclude_attach);
+        //if ($obj->tags){
+            $oMigration->printPostItem($document_info->document_srl, $obj, $exclude_attach);
+        //}
     }
 
     /*$contentTable = $db_info->db_table_prefix . '_content';

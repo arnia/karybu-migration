@@ -306,6 +306,12 @@
             unset($obj->comments);
             $attaches = $obj->attaches;
             unset($obj->attaches);
+//            if (isset($obj->tag_count)){
+//                $tag_count = $obj->tag_count;
+//                unset($obj->tag_count);
+//                $tags = $obj->tags;
+//                unset($obj->tags);
+//            }
 
             // 내용을 출력
             foreach($obj as $key => $val) {
@@ -329,7 +335,6 @@
                 }
                 print "</trackbacks>\r\n";
             }
-
             // 댓글 출력
             $comment_count = count($comments);
             if($comment_count) {
@@ -428,5 +433,16 @@
             if(substr($file,0,1)==1) $file = substr($file,1);
             return 'http://'.$_SERVER['HTTP_HOST'].'/'.$file;
         }
+//        function printTagItem($obj) {
+//            if(!count($obj)) return;
+//
+//            print("<tags>\r\n");
+//            foreach($obj as $key => $val) {
+//                printf("<tag sequence=\"%d\">", $val->tag_id);
+//                $this->printString($val->tag);
+//                print "</tag>\r\n";
+//            }
+//            print("</tags>\r\n");
+//        }
     }
 ?>
