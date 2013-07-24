@@ -173,6 +173,7 @@ else {
 				 , date_format(from_unixtime(modified),'%Y%m%d%H%i%S') as last_update
 				 , metakey as meta_keywords
 				 , metadesc as meta_description
+				 , alias
 			from {$db_info->db_table_prefix}_content as article
 				inner join {$db_info->db_table_prefix}_users as user on user.id = article.created_by
 			order by article.id desc
@@ -194,6 +195,8 @@ else {
         $obj->update = $document_info->last_update;
         $obj->meta_description = $document_info->meta_description;
         $obj->meta_keywords = $document_info->meta_keywords;
+        //alias
+        $obj->alias = $document_info->document_srl.'-'.$document_info->alias;
 
         // Retrieve document categories
         $query = sprintf("select category.id as category_srl
