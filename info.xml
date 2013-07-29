@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<info>
+    <version>0.1</version>
+    <author>Arnia Software</author>
+    <source_types>
+        <type>
+            <label>Joomla</label>
+            <value>joomla</value>
+        </type>
+        <type>
+            <label>Dummy</label>
+            <value>dummy</value>
+        </type>
+    </source_types>
+</info>
