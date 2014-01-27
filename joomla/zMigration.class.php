@@ -306,6 +306,8 @@
             unset($obj->comments);
             $attaches = $obj->attaches;
             unset($obj->attaches);
+            $images = $obj->images;
+            unset($obj->images);
 //            if (isset($obj->tag_count)){
 //                $tag_count = $obj->tag_count;
 //                unset($obj->tag_count);
@@ -413,6 +415,20 @@
                     print "</key>\r\n";
                 }
                 print "</extra_vars>\r\n";
+            }
+
+            // images
+            $images_count = count($images);
+            if($images_count) {
+                printf('<images count="%d">%s', $images_count, "\r\n");
+
+                foreach($images as $key => $val) {
+                    print "<image>";
+                    $this->printString($val);
+                    print "</image>\r\n";
+                }
+
+                print "</images>\r\n";
             }
 
             print "</post>\r\n";

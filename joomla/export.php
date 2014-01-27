@@ -180,7 +180,6 @@ else {
         // Setup document common attributes
         //$obj->id = $document_info->document_srl;
         $obj->title = $document_info->title;
-        $obj->content = $document_info->content;
         $obj->user_id = $document_info->user_id;
         $obj->user_name = $document_info->user_name;
         $obj->nick_name = $document_info->nick_name;
@@ -189,6 +188,20 @@ else {
         $obj->update = $document_info->last_update;
         $obj->meta_description = $document_info->meta_description;
         $obj->meta_keywords = $document_info->meta_keywords;
+        $content = $document_info->content;
+        //images
+        preg_match_all('/< *img[^>]*src *= *["\']?([^"\']*)/i', $content, $match, PREG_PATTERN_ORDER);
+        $obj->images = $match[1];
+
+        // "./files/attach/"
+        foreach ($obj->images as $key => $value){
+            $new_val = './files/attach/' . $value;
+            $content = str_replace($value, $new_val, $content);
+            $obj->images[$key] = $new_val;
+        }
+        $obj->content = $content;
+
+
         //alias
         $obj->alias = $document_info->document_srl.'-'.$document_info->alias;
 
