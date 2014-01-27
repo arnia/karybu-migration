@@ -193,7 +193,6 @@ else {
         preg_match_all('/< *img[^>]*src *= *["\']?([^"\']*)/i', $content, $match, PREG_PATTERN_ORDER);
         $obj->images = $match[1];
 
-        // "./files/attach/"
         foreach ($obj->images as $key => $value){
             $new_val = './files/attach/' . $value;
             $content = str_replace($value, $new_val, $content);
