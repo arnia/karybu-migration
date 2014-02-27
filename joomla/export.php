@@ -163,14 +163,15 @@ else {
 				 , user.username as user_name
 				 , user.username as nick_name
 				 , user.email as email_address
-				 , date_format(from_unixtime(created),'%Y%m%d%H%i%S') as regdate
-				 , date_format(from_unixtime(modified),'%Y%m%d%H%i%S') as last_update
+				 , created as regdate
+				 , modified as last_update
 				 , metakey as meta_keywords
 				 , metadesc as meta_description
+				 , introtext as introtext
 				 , alias
 			from {$db_info->db_table_prefix}_content as article
 				inner join {$db_info->db_table_prefix}_users as user on user.id = article.created_by
-			order by article.id desc
+			order by article.id asc
 			{$limit_query}";
     $document_result = $oMigration->query($query);
 
@@ -184,11 +185,15 @@ else {
         $obj->user_name = $document_info->user_name;
         $obj->nick_name = $document_info->nick_name;
         $obj->email = $document_info->email_address;
-        $obj->regdate =  $document_info->regdate;
-        $obj->update = $document_info->last_update;
+        $obj->regdate =  date('YmdHis', strtotime($document_info->regdate));
+        $obj->last_update =  date('YmdHis', strtotime($document_info->last_update));
         $obj->meta_description = $document_info->meta_description;
         $obj->meta_keywords = $document_info->meta_keywords;
-        $content = $document_info->content;
+        if($document_info->content == $document_info->introtext) {
+            $content = $document_info->content;
+        } else {
+            $content = $document_info->introtext.$document_info->content;
+        }
         //images
         preg_match_all('/< *img[^>]*src *= *["\']?([^"\']*)/i', $content, $match, PREG_PATTERN_ORDER);
         $obj->images = $match[1];
