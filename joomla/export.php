@@ -166,7 +166,6 @@ else {
 				 , created as regdate
 				 , modified as last_update
 				 , metakey as meta_keywords
-				 , metadesc as meta_description
 				 , introtext as introtext
 				 , alias
 			from {$db_info->db_table_prefix}_content as article
@@ -187,7 +186,6 @@ else {
         $obj->email = $document_info->email_address;
         $obj->regdate =  date('YmdHis', strtotime($document_info->regdate));
         $obj->last_update =  date('YmdHis', strtotime($document_info->last_update));
-        $obj->meta_description = $document_info->meta_description;
         $obj->meta_keywords = $document_info->meta_keywords;
         if($document_info->content == $document_info->introtext) {
             $content = $document_info->content;
@@ -204,6 +202,7 @@ else {
             $obj->images[$key] = $new_val;
         }
         $obj->content = $content;
+        $obj->meta_description = substr(strip_tags($obj->content),0,100) . '...';
 
 
         //alias
