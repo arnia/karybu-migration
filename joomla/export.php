@@ -168,7 +168,7 @@ else {
 				 , metakey as meta_keywords
 				 , introtext as introtext
 				 , alias
-				 , hits
+				 , hits as readed_count
 			from {$db_info->db_table_prefix}_content as article
 				inner join {$db_info->db_table_prefix}_users as user on user.id = article.created_by
 			order by article.id asc
@@ -188,7 +188,7 @@ else {
         $obj->regdate =  date('YmdHis', strtotime($document_info->regdate));
         $obj->last_update =  date('YmdHis', strtotime($document_info->last_update));
         $obj->meta_keywords = $document_info->meta_keywords;
-        $obj->hits = $document_info->hits;
+        $obj->readed_count = $document_info->readed_count;
         if($document_info->content == $document_info->introtext) {
             $content = $document_info->content;
         } else {
