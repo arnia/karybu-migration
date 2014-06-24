@@ -260,8 +260,8 @@ else {
 				   , comment.name as nick_name
 				   , comment.email as email_address
 				   , comment.homepage as homepage
-				   , date_format(from_unixtime(date),'%Y%m%d%H%i%S') as regdate
-				   , date_format(from_unixtime(date),'%Y%m%d%H%i%S') as last_update
+				   , date as regdate
+				   , date as last_update
 				   , comment.ip as ipaddress
 				from {$db_info->db_table_prefix}_content as article
 				  inner join {$db_info->db_table_prefix}_jcomments as comment
@@ -284,8 +284,8 @@ else {
             $comment_obj->user_name = $comment_info->user_name;
             $comment_obj->email = $comment_info->email_address;
             $comment_obj->homepage = $comment_info->homepage;
-            $comment_obj->regdate = $comment_info->regdate;
-            $comment_obj->update = $comment_info->last_update;
+            $comment_obj->regdate = date("YmdHis",strtotime($comment_info->regdate));
+            $comment_obj->last_update = date("YmdHis",strtotime($comment_info->last_update));
             $comment_obj->ipaddress = $comment_info->ipaddress;
             $comments[] = $comment_obj;
         }

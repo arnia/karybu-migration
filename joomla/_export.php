@@ -207,7 +207,7 @@
 			$obj->is_notice = 'N';
 			$obj->is_secret = $document_info->is_secret;
 			$obj->regdate =  $document_info->regdate;
-			$obj->update = $document_info->last_update;
+			$obj->last_update = $document_info->last_update;
 
 			// Retrieve document categories
 			$query = sprintf("select cat.forum_id as category_srl
@@ -269,7 +269,7 @@
 				$comment_obj->email = $comment_info->email_address;
 				$comment_obj->homepage = $comment_info->homepage;
 				$comment_obj->regdate = $comment_info->regdate;
-				$comment_obj->update = $comment_info->last_update;
+				$comment_obj->last_update = $comment_info->last_update;
 				$comment_obj->ipaddress = $comment_info->ipaddress;
 				$comments[] = $comment_obj;
 			}
