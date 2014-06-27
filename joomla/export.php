@@ -168,6 +168,7 @@ else {
 				 , metakey as meta_keywords
 				 , introtext as introtext
 				 , alias
+				 , attribs
 				 , hits as readed_count
 			from {$db_info->db_table_prefix}_content as article
 				inner join {$db_info->db_table_prefix}_users as user on user.id = article.created_by
@@ -195,8 +196,20 @@ else {
             $content = $document_info->introtext.$document_info->content;
         }
         //images
+        $attribs = explode("\n",$document_info->attribs);
+
+        foreach($attribs as $attr){
+            $keys = explode("=",$attr);
+            if($keys[0] == "thumb_path"){
+                $document_info->thumb_path = $keys[1];
+            }
+        }
         preg_match_all('/< *img[^>]*src *= *["\']?([^"\']*)/i', $content, $match, PREG_PATTERN_ORDER);
         $obj->images = $match[1];
+
+        if(count($obj->images) == 0 && $document_info->thumb_path != ''){
+            $obj->images[] = $document_info->thumb_path;
+        }
 
         foreach ($obj->images as $key => $value){
             $new_val = './files/attach/' . $value;
